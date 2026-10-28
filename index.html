@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffc907">
+    <title>H2O Logic | Charity: water</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="app-screen title-screen">
+        <div class="screen-inner">
+            <header class="topbar">
+                <a class="brand" href="index.html" aria-label="Charity: water home">
+                    <img src="img/cw_logo_horizontal.png" alt="charity: water">
+                </a>
+            </header>
+
+            <section class="hero" aria-labelledby="game-title">
+                <div class="hero-copy">
+                    <p class="eyebrow">CLEAN WATER STARTS HERE</p>
+                    <h1 id="game-title">H<sub>2</sub>O<br><span>Logic</span></h1>
+                    <p class="tagline">Connect the pipes. Deliver clean water. Change lives.</p>
+                    <p class="intro">Every turn brings a community closer to clean water. Can you find the way?</p>
+                    <div class="actions">
+                        <button class="button button-primary" id="play-button" type="button">
+                            Play Game
+                        </button>
+                        <button class="button button-secondary" id="how-to-play-button" type="button">How to Play</button>
+                    </div>
+                    <p class="level-note"><span class="level-mark" aria-hidden="true">01</span> YOUR FIRST WATER CHALLENGE</p>
+                  </div>
+
+                <div class="hero-art" aria-hidden="true">
+                </div>
+            </section>
+
+            <footer class="screen-footer">
+                <span>Small turns. Real-world impact.</span>
+            </footer>
+        </div>
+    </main>
+
+    <main class="app-screen game-screen" id="game-screen" hidden>
+        <div class="game-frame">
+            <header class="game-header">
+                <div class="game-level">
+                    <button class="game-icon-button" id="game-home-button" type="button" aria-label="Return to title" title="Home">&#8592;</button>
+                    <div class="game-title-label"><span>H2O LOGIC</span><strong id="level-number">LEVEL 01</strong></div>
+                </div>
+
+                <div class="game-stats" aria-label="Game statistics">
+                    <div class="game-stat"><span>TIME</span><strong id="timer-counter">02:00</strong></div>
+                    <div class="game-stat"><span>MOVES</span><strong id="moves-counter">40</strong></div>
+                    <div class="game-stat"><span>IMPACT</span><strong id="impact-counter">0</strong></div>
+                </div>
+
+                <div class="game-controls" aria-label="Game controls">
+                    <button class="game-icon-button" id="hint-button" type="button" aria-label="Get a hint" title="Hint">?</button>
+                    <button class="game-icon-button" id="pause-button" type="button" aria-label="Pause game" title="Pause">&#10074;&#10074;</button>
+                    <button class="game-icon-button" id="restart-button" type="button" aria-label="Restart puzzle" title="Restart">&#8635;</button>
+                </div>
+            </header>
+
+            <section class="board-stage" aria-label="Pipe puzzle">
+                <div class="endpoint source-port">
+                    <img class="endpoint-photo" src="img/charity%20water%20the%20water%20source.jpg" alt="Water filling a yellow jerrycan from a pump">
+                    <span class="endpoint-copy"><strong>WATER SOURCE</strong></span>
+                </div>
+                <div class="pipe-grid" id="pipe-grid" role="group" aria-label="Four by four pipe grid"></div>
+                <div class="endpoint community-port">
+                    <img class="endpoint-photo" src="img/charity%20water%20community2.jpg" alt="Community celebrating clean water from a new pump">
+                    <span class="endpoint-copy"><strong>THE COMMUNITY</strong></span>
+                </div>
+                <div class="game-toast" id="game-toast" role="status" aria-live="polite" hidden></div>
+                <div class="pause-overlay" id="pause-overlay" hidden><strong>Paused</strong><span>Take a breath. Your timer is stopped.</span></div>
+            </section>
+
+            <footer class="game-action-bar">
+                <button class="button check-flow-button" id="check-flow-button" type="button">Check Flow</button>
+            </footer>
+        </div>
+    </main>
+
+    <dialog class="info-dialog" id="how-to-play-dialog" aria-labelledby="how-to-play-title">
+        <form method="dialog" class="dialog-close-wrap">
+            <button class="dialog-close" aria-label="Close how to play">&times;</button>
+        </form>
+        <p class="dialog-eyebrow">THE FLOW</p>
+        <h2 id="how-to-play-title">How to Play</h2>
+        <ol class="instructions">
+            <li><span>1</span><p><strong>Connect every tile</strong>Start at START, follow the pipe openings across all four rows, and use Hint if you get stuck before reaching END.</p></li>
+            <li><span>2</span><p><strong>Watch your moves</strong>You have a limited number of turns and a timer to finish the route.</p></li>
+            <li><span>3</span><p><strong>Use Hint wisely</strong>Your first Hint is free. Each later Hint costs 10 Impact points, and Hint is unavailable if you have fewer than 10 points.</p></li>
+            <li><span>4</span><p><strong>Check the flow</strong>Trace a complete path to deliver clean water and grow your impact.</p></li>
+        </ol>
+        <form method="dialog"><button class="button button-primary dialog-done">Got it</button></form>
+    </dialog>
+
+    <dialog class="info-dialog results-dialog" id="results-dialog" aria-labelledby="results-title">
+        <div class="confetti-layer" id="confetti-layer" aria-hidden="true" hidden></div>
+        <p class="dialog-eyebrow" id="results-eyebrow">LEVEL 01</p>
+        <h2 id="results-title">Water is flowing!</h2>
+        <p class="ready-copy" id="results-message">You connected the source to the community.</p>
+        <div class="result-stats">
+            <div><span>IMPACT</span><strong id="results-impact">1</strong></div>
+            <div><span>TIME TAKEN</span><strong id="results-time">00:00</strong></div>
+            <div><span>MOVES USED</span><strong id="results-moves">0</strong></div>
+        </div>
+        <div class="ready-actions">
+            <button class="button button-primary" id="next-level-button" type="button" hidden>Next Level</button>
+            <button class="button button-primary" id="retry-button" type="button">Play Again</button>
+            <button class="button button-secondary" id="results-home-button" type="button">Home</button>
+        </div>
+    </dialog>
+
+    <script src="script.js"></script>
+</body>
+</html>
