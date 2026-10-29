@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffc907">
     <title>H2O Logic | Charity: water</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <main class="app-screen title-screen">
         <div class="screen-inner">
             <header class="topbar">
-                <a class="brand" href="index.html" aria-label="Charity: water home">
+                <a class="brand" href="https://www.charitywater.org/" target="_blank" rel="noopener" aria-label="Visit Charity: water website">
                     <img src="img/cw_logo_horizontal.png" alt="charity: water">
                 </a>
             </header>
@@ -25,6 +22,14 @@
                     <h1 id="game-title">H<sub>2</sub>O<br><span>Logic</span></h1>
                     <p class="tagline">Connect the pipes. Deliver clean water. Change lives.</p>
                     <p class="intro">Every turn brings a community closer to clean water. Can you find the way?</p>
+                    <fieldset class="difficulty-picker">
+                        <legend>CHOOSE DIFFICULTY</legend>
+                        <div class="difficulty-options">
+                            <button class="difficulty-option" type="button" data-difficulty="easy" aria-pressed="false">Easy</button>
+                            <button class="difficulty-option is-selected" type="button" data-difficulty="normal" aria-pressed="true">Normal</button>
+                            <button class="difficulty-option" type="button" data-difficulty="hard" aria-pressed="false">Hard</button>
+                        </div>
+                    </fieldset>
                     <div class="actions">
                         <button class="button button-primary" id="play-button" type="button">
                             Play Game
@@ -81,6 +86,9 @@
 
             <footer class="game-action-bar">
                 <button class="button check-flow-button" id="check-flow-button" type="button">Check Flow</button>
+                <a class="game-brand" href="https://www.charitywater.org/" target="_blank" rel="noopener" aria-label="Visit Charity: water website">
+                    <img src="img/cw_logo_horizontal.png" alt="">
+                </a>
             </footer>
         </div>
     </main>
@@ -93,9 +101,9 @@
         <h2 id="how-to-play-title">How to Play</h2>
         <ol class="instructions">
             <li><span>1</span><p><strong>Connect every tile</strong>Start at START, follow the pipe openings across all four rows, and use Hint if you get stuck before reaching END.</p></li>
-            <li><span>2</span><p><strong>Watch your moves</strong>You have a limited number of turns and a timer to finish the route.</p></li>
+            <li><span>2</span><p><strong>Watch your moves</strong>Easy, Normal, and Hard change how many pipes need rotating, your move limit, and your time.</p></li>
             <li><span>3</span><p><strong>Use Hint wisely</strong>Your first Hint is free. Each later Hint costs 10 Impact points, and Hint is unavailable if you have fewer than 10 points.</p></li>
-            <li><span>4</span><p><strong>Check the flow</strong>Trace a complete path to deliver clean water and grow your impact.</p></li>
+            <li><span>4</span><p><strong>Check the flow</strong>Aligning a scrambled pipe earns 5 Impact and milestone messages. Completing a level brings its score to 100 before hint costs.</p></li>
         </ol>
         <form method="dialog"><button class="button button-primary dialog-done">Got it</button></form>
     </dialog>
@@ -117,6 +125,7 @@
         </div>
     </dialog>
 
+    <audio id="flow-sound" src="freesound_community-water-43635.mp3" preload="auto"></audio>
     <script src="script.js"></script>
 </body>
 </html>

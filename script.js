@@ -5,6 +5,7 @@ const howToPlayButton = document.querySelector('#how-to-play-button');
 const howToPlayDialog = document.querySelector('#how-to-play-dialog');
 const resultsDialog = document.querySelector('#results-dialog');
 const confettiLayer = document.querySelector('#confetti-layer');
+const flowSound = document.querySelector('#flow-sound');
 const pipeGrid = document.querySelector('#pipe-grid');
 const timerCounter = document.querySelector('#timer-counter');
 const movesCounter = document.querySelector('#moves-counter');
@@ -21,8 +22,17 @@ const resultsEyebrow = document.querySelector('#results-eyebrow');
 const nextLevelButton = document.querySelector('#next-level-button');
 const retryButton = document.querySelector('#retry-button');
 
-const gameDuration = 120;
-const startingMoves = 40;
+const difficultySettings = {
+    easy: { time: 180, moves: 60, scrambledPipes: 3 },
+    normal: { time: 120, moves: 40, scrambledPipes: 7 },
+    hard: { time: 60, moves: 36, scrambledPipes: 12 }
+};
+const scrambleOrder = [2, 5, 10, 13, 0, 3, 12, 15, 6, 9, 1, 4, 7, 8, 11, 14];
+const milestoneMessages = [
+    { progress: 0.25, message: 'Great start! Keep the water moving.' },
+    { progress: 0.5, message: 'Halfway there!' },
+    { progress: 0.75, message: 'Almost there! The community is within reach.' }
+];
 const hintCost = 10;
 const directions = ['N', 'E', 'S', 'W'];
 const nextCell = {
@@ -38,7 +48,7 @@ const puzzleLayout = [
     [
         { type: 'elbow', solution: 2, isRoute: true },
         { type: 'elbow', solution: 1, isRoute: true },
-        { type: 'elbow', solution: 2, isRoute: true, scramble: true },
+            { type: 'elbow', solution: 2, isRoute: true },
         { type: 'elbow', solution: 1, isRoute: true }
     ],
     [
@@ -71,18 +81,18 @@ const levelTwoLayout = [
     [
         { type: 'line', solution: 0, isRoute: true },
         { type: 'elbow', solution: 0, isRoute: true },
-        { type: 'line', solution: 1, isRoute: true, scramble: true },
+            { type: 'line', solution: 1, isRoute: true },
         { type: 'elbow', solution: 2, isRoute: true }
     ],
     [
         { type: 'line', solution: 0, isRoute: true },
         { type: 'elbow', solution: 1, isRoute: true },
-        { type: 'elbow', solution: 2, isRoute: true, scramble: true },
+            { type: 'elbow', solution: 2, isRoute: true },
         { type: 'line', solution: 0, isRoute: true }
     ],
     [
         { type: 'elbow', solution: 0, isRoute: true },
-        { type: 'elbow', solution: 3, isRoute: true, scramble: true },
+            { type: 'elbow', solution: 3, isRoute: true },
         { type: 'elbow', solution: 0, isRoute: true },
         { type: 'elbow', solution: 3, isRoute: true }
     ]
@@ -90,10 +100,18 @@ const levelTwoLayout = [
 
 let board = [];
 let currentLevel = 0;
+let currentDifficulty = 'normal';
 let hintsUsed = 0;
+let gameDuration = difficultySettings[currentDifficulty].time;
+let startingMoves = difficultySettings[currentDifficulty].moves;
 let timeRemaining = gameDuration;
 let movesRemaining = startingMoves;
 let impact = 0;
+let scrambledPipeKeys = new Set();
+let scoredPipeKeys = new Set();
+let completedLevelBonuses = new Set();
+let levelProgressScores = [0, 0];
+let nextMilestoneIndexes = [0, 0];
 let isPaused = false;
 let isFinished = false;
 let isFlowing = false;
@@ -121,11 +139,20 @@ function isTileCorrect(tile) {
 
 function makeBoard() {
     const layout = currentLevel === 0 ? puzzleLayout : levelTwoLayout;
+    const scrambledCells = scrambleOrder.slice(0, difficultySettings[currentDifficulty].scrambledPipes);
+    scrambledPipeKeys = new Set(scrambledCells.map((cellIndex) => {
+        const row = Math.floor(cellIndex / 4);
+        const column = cellIndex % 4;
 
-    board = layout.map((row) => row.map((tile) => {
+        return `${row},${column}`;
+    }));
+
+    board = layout.map((row, rowIndex) => row.map((tile, columnIndex) => {
         let rotation = tile.solution;
 
-        if (tile.scramble) {
+        const cellKey = `${rowIndex},${columnIndex}`;
+
+        if (tile.isRoute && scrambledPipeKeys.has(cellKey)) {
             const rotationCount = tile.type === 'line' ? 2 : 4;
             rotation = (tile.solution + 1) % rotationCount;
         } else if (!tile.isRoute) {
@@ -187,6 +214,44 @@ function updateCounters() {
     movesCounter.textContent = movesRemaining;
     impactCounter.textContent = impact;
     updateHintButton();
+}
+
+function resetScoreProgress() {
+    impact = 0;
+    scrambledPipeKeys = new Set();
+    scoredPipeKeys = new Set();
+    completedLevelBonuses = new Set();
+    levelProgressScores = [0, 0];
+    nextMilestoneIndexes = [0, 0];
+    impactCounter.textContent = impact;
+    resultsImpactCounter.textContent = impact;
+}
+
+function awardPipePoints(tile, row, column) {
+    const cellKey = `${row},${column}`;
+    const scoreKey = `${currentLevel}-${cellKey}`;
+
+    if (!tile.isRoute || !scrambledPipeKeys.has(cellKey) || scoredPipeKeys.has(scoreKey) || !isTileCorrect(tile)) {
+        return;
+    }
+
+    scoredPipeKeys.add(scoreKey);
+    impact += 5;
+    levelProgressScores[currentLevel] += 5;
+    updateCounters();
+
+    const milestone = milestoneMessages[nextMilestoneIndexes[currentLevel]];
+
+    if (!milestone) {
+        return;
+    }
+
+    const pipesNeeded = Math.ceil(difficultySettings[currentDifficulty].scrambledPipes * milestone.progress);
+
+    if (levelProgressScores[currentLevel] >= pipesNeeded * 5) {
+        nextMilestoneIndexes[currentLevel] += 1;
+        showToast(milestone.message);
+    }
 }
 
 function animateImpactIncrease(startValue, endValue) {
@@ -372,7 +437,12 @@ function finishGame(didWin) {
     isFlowing = false;
 
     if (didWin) {
-        impact += 100;
+        if (!completedLevelBonuses.has(currentLevel)) {
+            const remainingLevelPoints = 100 - levelProgressScores[currentLevel];
+
+            impact += remainingLevelPoints;
+            completedLevelBonuses.add(currentLevel);
+        }
         celebrateWin();
     } else {
         clearConfetti();
@@ -387,7 +457,7 @@ function finishGame(didWin) {
     gameToast.hidden = true;
 
     document.querySelector('#results-title').textContent = didWin ? 'Water is flowing!' : 'The water stopped.';
-    resultsEyebrow.textContent = `LEVEL ${String(currentLevel + 1).padStart(2, '0')}${didWin ? ' COMPLETE' : ''}`;
+    resultsEyebrow.textContent = `${currentDifficulty.toUpperCase()} - LEVEL ${String(currentLevel + 1).padStart(2, '0')}${didWin ? ' COMPLETE' : ''}`;
     document.querySelector('#results-message').textContent = didWin
         ? 'Great work! Clean water is reaching the community.'
         : 'The route is not complete yet. Try again and connect every pipe.';
@@ -419,6 +489,7 @@ function checkFlow() {
     }
 
     isFlowing = true;
+    playFlowSound();
 
     path.forEach((cellKey) => {
         const [row, column] = cellKey.split(',');
@@ -427,6 +498,17 @@ function checkFlow() {
     });
 
     flowTimeoutId = window.setTimeout(() => finishGame(true), 850);
+}
+
+function playFlowSound() {
+    stopFlowSound();
+    flowSound.currentTime = 0.5;
+    flowSound.play();
+}
+
+function stopFlowSound() {
+    flowSound.pause();
+    flowSound.currentTime = 0;
 }
 
 function startTimer() {
@@ -451,6 +533,7 @@ function startGame(levelIndex = currentLevel) {
     impactAnimationId = null;
     clearTimeout(flowTimeoutId);
     clearTimeout(toastTimeoutId);
+    stopFlowSound();
     clearConfetti();
     resultsDialog.close();
     impactCounter.classList.remove('is-counting');
@@ -465,6 +548,8 @@ function startGame(levelIndex = currentLevel) {
     gameScreen.hidden = false;
     gameScreen.classList.remove('is-paused');
 
+    gameDuration = difficultySettings[currentDifficulty].time;
+    startingMoves = difficultySettings[currentDifficulty].moves;
     timeRemaining = gameDuration;
     movesRemaining = startingMoves;
     isPaused = false;
@@ -476,7 +561,7 @@ function startGame(levelIndex = currentLevel) {
     pauseButton.textContent = '\u275A\u275A';
     pauseButton.setAttribute('aria-label', 'Pause game');
     checkFlowButton.disabled = false;
-    levelNumber.textContent = `LEVEL ${String(currentLevel + 1).padStart(2, '0')}`;
+    levelNumber.textContent = `LEVEL ${String(currentLevel + 1).padStart(2, '0')} - ${currentDifficulty.toUpperCase()}`;
 
     makeBoard();
     renderBoard();
@@ -507,6 +592,7 @@ function returnToTitle() {
     clearInterval(impactAnimationId);
     clearTimeout(flowTimeoutId);
     clearTimeout(toastTimeoutId);
+    stopFlowSound();
     clearConfetti();
     timerId = null;
     impactAnimationId = null;
@@ -522,7 +608,28 @@ function returnToTitle() {
     playButton.focus();
 }
 
-playButton.addEventListener('click', () => startGame(0));
+playButton.addEventListener('click', () => {
+    resetScoreProgress();
+    hintsUsed = 0;
+    startGame(0);
+});
+
+document.querySelectorAll('.difficulty-option').forEach((button) => {
+    button.addEventListener('click', () => {
+        const selectedDifficulty = button.dataset.difficulty;
+
+        if (currentDifficulty !== selectedDifficulty) {
+            currentDifficulty = selectedDifficulty;
+            resetScoreProgress();
+        }
+
+        document.querySelectorAll('.difficulty-option').forEach((option) => {
+            const isSelected = option === button;
+            option.classList.toggle('is-selected', isSelected);
+            option.setAttribute('aria-pressed', isSelected);
+        });
+    });
+});
 
 howToPlayButton.addEventListener('click', () => {
     howToPlayDialog.showModal();
@@ -546,6 +653,7 @@ pipeGrid.addEventListener('click', (event) => {
     const updatedTile = drawTile(tile, row, column);
     pipeGrid.replaceChild(updatedTile, tileButton);
     updateCounters();
+    awardPipePoints(tile, row, column);
 
     if (movesRemaining <= 0) {
         finishGame(false);

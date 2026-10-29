@@ -23,6 +23,7 @@ Secondary Colors:
 	--green: #4fcb53;
 	--paper: #fffefa;
 	--border: #dedfd7;
+	--font-brand: "Proxima Nova", "Avenir Next", Avenir, sans-serif;
 }
 
 * {
@@ -40,7 +41,7 @@ body {
 	margin: 0;
 	background: #f1efe6;
 	color: var(--ink);
-	font-family: "DM Sans", sans-serif;
+	font-family: var(--font-brand);
 }
 
 /* Use this viewport-sized shell for every game screen to prevent page scrolling. */
@@ -180,7 +181,7 @@ button {
 
 h1 {
 	margin: 0;
-	font-family: "Fraunces", Georgia, serif;
+	font-family: var(--font-brand);
 	font-size: clamp(86px, 10vw, 142px);
 	font-weight: 700;
 	letter-spacing: 0;
@@ -215,6 +216,52 @@ h1 span {
 	color: var(--muted);
 	font-size: 15px;
 	line-height: 1.65;
+}
+
+.difficulty-picker {
+	margin: 17px 0 0;
+	padding: 0;
+	border: 0;
+}
+
+.difficulty-picker legend {
+	margin-bottom: 7px;
+	color: var(--muted);
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: 1px;
+}
+
+.difficulty-options {
+	display: inline-grid;
+	grid-template-columns: repeat(3, minmax(74px, 1fr));
+	border: 1px solid var(--ink);
+}
+
+.difficulty-option {
+	min-height: 34px;
+	padding: 0 12px;
+	border: 0;
+	background: var(--paper);
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.difficulty-option + .difficulty-option {
+	border-left: 1px solid var(--ink);
+}
+
+.difficulty-option:hover,
+.difficulty-option.is-selected {
+	background: var(--yellow);
+}
+
+.difficulty-option:focus-visible {
+	position: relative;
+	z-index: 1;
+	outline: 3px solid var(--blue);
+	outline-offset: 2px;
 }
 
 .actions {
@@ -357,7 +404,7 @@ h1 span {
 .info-dialog h2 {
 	max-width: 390px;
 	margin: 0 0 22px;
-	font-family: "Fraunces", Georgia, serif;
+	font-family: var(--font-brand);
 	font-size: clamp(30px, 8vw, 42px);
 	line-height: 1.08;
 }
@@ -514,6 +561,10 @@ h1 span {
 		margin-top: 20px;
 	}
 
+	.difficulty-picker {
+		margin-top: 12px;
+	}
+
 	.button {
 		min-height: 47px;
 		gap: 13px;
@@ -589,6 +640,10 @@ h1 span {
 	.actions {
 		gap: 8px;
 		margin-top: 12px;
+	}
+
+	.difficulty-picker {
+		margin-top: 9px;
 	}
 
 	.button {
@@ -845,7 +900,7 @@ h1 span {
 	background: rgb(255 254 250 / 92%);
 	box-shadow: 0 4px 18px rgb(24 35 34 / 16%);
 	color: var(--ink);
-	font-family: "Fraunces", Georgia, serif;
+	font-family: var(--font-brand);
 	font-size: clamp(18px, 2.2vw, 28px);
 	font-weight: 700;
 	animation-name: instruction-toast-enter;
@@ -1056,18 +1111,39 @@ h1 span {
 }
 
 .game-action-bar {
-	display: flex;
+	display: grid;
 	min-height: 94px;
 	flex: 0 0 auto;
-	flex-direction: column;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr) 24px;
 	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 8px 16px;
+	padding: 6px 16px 8px;
 	border-top: 1px solid var(--border);
 }
 
+.game-brand {
+	display: block;
+	width: min(112px, 30vw);
+	grid-column: 1;
+	grid-row: 2;
+	justify-self: end;
+}
+
+.game-brand img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.game-brand:focus-visible {
+	outline: 3px solid var(--blue);
+	outline-offset: 3px;
+}
+
 .check-flow-button {
+	grid-column: 1;
+	grid-row: 1;
+	justify-self: center;
 	min-width: 190px;
 	min-height: 50px;
 	background: var(--blue);
@@ -1102,7 +1178,7 @@ h1 span {
 }
 
 .pause-overlay strong {
-	font-family: "Fraunces", Georgia, serif;
+	font-family: var(--font-brand);
 	font-size: 38px;
 }
 
@@ -1324,11 +1400,9 @@ h1 span {
 	}
 
 	.game-action-bar {
-		min-height: 0;
-		flex-direction: column;
-		align-items: center;
-		gap: 7px;
-		padding: 8px 10px;
+	min-height: 82px;
+	grid-template-rows: minmax(0, 1fr) 22px;
+	padding: 5px 10px;
 	}
 
 	.game-toast {
